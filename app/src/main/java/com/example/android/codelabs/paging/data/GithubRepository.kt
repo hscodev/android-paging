@@ -33,10 +33,15 @@ class GithubRepository(private val service: GithubService) {
      * Search repositories whose names match the query, exposed as a stream of data that will emit
      * every time we get more data from the network.
      */
-    fun getSearchResultStream(query: String): Flow<PagingData<Repo>> {
+    fun getSearchResultStream(query: String): Flow<PagingData<List<Repo>>> {
         Log.d("GithubRepository", "New query: $query")
         return Pager(
-            config = PagingConfig(pageSize = NETWORK_PAGE_SIZE, enablePlaceholders = false),
+            config = PagingConfig(
+                initialLoadSize = NETWORK_PAGE_SIZE,
+                pageSize = NETWORK_PAGE_SIZE,
+                enablePlaceholders = false,
+                prefetchDistance = 10
+            ),
             pagingSourceFactory = { GithubPagingSource(service, query) }
         ).flow
     }
