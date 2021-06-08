@@ -20,9 +20,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import androidx.paging.flatMap
 import com.example.android.codelabs.paging.data.GithubRepository
 import com.example.android.codelabs.paging.model.Repo
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 /**
  * ViewModel for the [SearchRepositoriesActivity] screen.
@@ -40,6 +42,7 @@ class SearchRepositoriesViewModel(private val repository: GithubRepository) : Vi
         }
         currentQueryValue = queryString
         val newResult: Flow<PagingData<Repo>> = repository.getSearchResultStream(queryString)
+            .map { data -> data.flatMap { it } }
             .cachedIn(viewModelScope)
         currentSearchResult = newResult
         return newResult

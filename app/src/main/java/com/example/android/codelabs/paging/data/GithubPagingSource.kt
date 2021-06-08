@@ -31,8 +31,8 @@ private const val GITHUB_STARTING_PAGE_INDEX = 1
 class GithubPagingSource(
     private val service: GithubService,
     private val query: String
-) : PagingSource<Int, Repo>() {
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Repo> {
+) : PagingSource<Int, List<Repo>>() {
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, List<Repo>> {
         val position = params.key ?: GITHUB_STARTING_PAGE_INDEX
         val apiQuery = query + IN_QUALIFIER
         return try {
@@ -46,7 +46,7 @@ class GithubPagingSource(
                 position + (params.loadSize / NETWORK_PAGE_SIZE)
             }
             LoadResult.Page(
-                data = repos,
+                data = listOf(repos),
                 prevKey = if (position == GITHUB_STARTING_PAGE_INDEX) null else position - 1,
                 nextKey = nextKey
             )
@@ -58,7 +58,7 @@ class GithubPagingSource(
     }
 
     // The refresh key is used for the initial load of the next PagingSource, after invalidation
-    override fun getRefreshKey(state: PagingState<Int, Repo>): Int? {
+    override fun getRefreshKey(state: PagingState<Int, List<Repo>>): Int? {
         // We need to get the previous key (or next key if previous is null) of the page
         // that was closest to the most recently accessed index.
         // Anchor position is the most recently accessed index
